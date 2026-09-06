@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shakana — Production Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14181C;
+    --panel: #1C2128;
+    --line: rgba(230,235,240,0.10);
+    --text: #E6EBF0;
+    --muted: rgba(230,235,240,0.55);
+    --steel: #5B8AA6;
+    --amber: #D6923D;
+    --green: #6FA97A;
+    --red: #B9604F;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
+  h1,h2,.mono{font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Space Grotesk',sans-serif;}
+  .app{max-width:1080px;margin:0 auto;padding:24px 20px 60px;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+  .brand{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;}
+  .brand span{color:var(--amber);}
+  .tabs{display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px;}
+  .tabs button{background:transparent;border:none;color:var(--muted);font-size:13px;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Inter';}
+  .tabs button.active{background:var(--steel);color:#0E1114;font-weight:600;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .section-head h2{font-size:15px;letter-spacing:0.4px;color:var(--muted);text-transform:uppercase;margin:0;font-weight:500;}
+  .add-btn{background:var(--amber);color:#241708;border:none;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter';}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:28px;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line);font-weight:500;}
+  td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px;}
+  tr:last-child td{border-bottom:none;}
+  .qty-low{color:var(--red);font-weight:600;}
+  .qty-ok{color:var(--green);}
+  .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;font-family:'Inter';}
+  .badge.running{background:rgba(111,169,122,0.18);color:var(--green);}
+  .badge.planned{background:rgba(214,146,61,0.18);color:var(--amber);}
+  .badge.done{background:rgba(91,138,166,0.18);color:var(--steel);}
+  .row-actions button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:4px;padding:4px 8px;font-size:11px;cursor:pointer;margin-right:4px;}
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;z-index:10;}
+  .modal-backdrop.active{display:flex;}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px;width:340px;}
+  .modal h3{margin:0 0 14px;font-family:'Space Grotesk';}
+  .modal label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;}
+  .modal input, .modal select{width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:6px;color:var(--text);font-family:'Inter';font-size:14px;}
+  .modal-actions{display:flex;gap:8px;margin-top:18px;}
+  .modal-actions button{flex:1;padding:9px;border-radius:6px;border:none;cursor:pointer;font-weight:600;font-size:13px;}
+  .btn-cancel{background:transparent;border:1px solid var(--line) !important;color:var(--muted);}
+  .btn-save{background:var(--amber);color:#241708;}
+  .empty{color:var(--muted);font-size:13px;padding:24px;text-align:center;}
+  .note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">Shakana <span>&middot;</span> production control</div>
+    <div class="tabs">
+      <button id="tab-materials" class="active">Raw Materials</button>
+      <button id="tab-goods">Finished Goods</button>
+      <button id="tab-runs">Production Runs</button>
+    </div>
+  </div>
+
+  <div id="panel-materials" class="panel active">
+    <div class="section-head"><h2>Raw material stock</h2><button class="add-btn" data-modal="material">+ Add material</button></div>
+    <table>
+      <thead><tr><th>Material</th><th>Quantity</th><th>Unit</th><th>Reorder level</th><th></th></tr></thead>
+      <tbody id="materials-body"></tbody>
+    </table>
+  </div>
+
+  <div id="panel-goods" class="panel">
+    <div class="section-head"><h2>Finished goods stock</h2><button class="add-btn" data-modal="good">+ Add product</button></div>
+    <table>
+      <thead><tr><th>Product</th><th>Quantity ready</th><th>Unit</th><th></th></tr></thead>
+      <tbody id="goods-body"></tbody>
+    </table>
+  </div>
+
+  <div id="panel-runs" class="panel">
+    <div class="section-head"><h2>Production runs</h2><button class="add-btn" data-modal="run">+ New run</button></div>
+    <table>
+      <thead><tr><th>Product</th><th>Target qty</th><th>Status</th><th></th></tr></thead>
+      <tbody id="runs-body"></tbody>
+    </table>
+    <div class="note">Marking a run "Done" adds its target quantity into Finished Goods stock automatically.</div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const STORE_KEY = "factory_data";
+let data = { materials: [], goods: [], runs: [] };
+
+async function loadData(){
+  try {
+    const existing = await window.storage.get(STORE_KEY, false);
+    if (existing) data = JSON.parse(existing.value);
+  } catch(e) { /* first run, nothing stored yet */ }
+}
+async function saveData(){
+  try { await window.storage.set(STORE_KEY, JSON.stringify(data), false); }
+  catch(e) { console.error("save failed", e); }
+}
+
+function switchTab(name){
+  ["materials","goods","runs"].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle("active", t === name);
+    document.getElementById(`panel-${t}`).classList.toggle("active", t === name);
+  });
+}
+document.getElementById("tab-materials").onclick = () => switchTab("materials");
+document.getElementById("tab-goods").onclick = () => switchTab("goods");
+document.getElementById("tab-runs").onclick = () => switchTab("runs");
+
+function renderMaterials(){
+  const body = document.getElementById("materials-body");
+  if (!data.materials.length) { body.innerHTML = `<tr><td colspan="5" class="empty">No raw materials yet</td></tr>`; return; }
+  body.innerHTML = data.materials.map((m, i) => `
+    <tr>
+      <td>${m.name}</td>
+      <td class="${m.qty <= m.reorder ? 'qty-low' : 'qty-ok'}">${m.qty}</td>
+      <td>${m.unit}</td>
+      <td>${m.reorder}</td>
+      <td class="row-actions"><button data-del="materials" data-idx="${i}">Delete</button></td>
+    </tr>
+  `).join("");
+}
+
+function renderGoods(){
+  const body = document.getElementById("goods-body");
+  if (!data.goods.length) { body.innerHTML = `<tr><td colspan="4" class="empty">No finished goods yet</td></tr>`; return; }
+  body.innerHTML = data.goods.map((g, i) => `
+    <tr>
+      <td>${g.name}</td>
+      <td>${g.qty}</td>
+      <td>${g.unit}</td>
+      <td class="row-actions"><button data-del="goods" data-idx="${i}">Delete</button></td>
+    </tr>
+  `).join("");
+}
+
+function renderRuns(){
+  const body = document.getElementById("runs-body");
+  if (!data.runs.length) { body.innerHTML = `<tr><td colspan="4" class="empty">No production runs yet</td></tr>`; return; }
+  body.innerHTML = data.runs.map((r, i) => `
+    <tr>
+      <td>${r.product}</td>
+      <td>${r.qty}</td>
+      <td><span class="badge ${r.status}">${r.status}</span></td>
+      <td class="row-actions">
+        ${r.status !== "done" ? `<button data-advance="${i}">${r.status === "planned" ? "Start" : "Mark done"}</button>` : ""}
+        <button data-del="runs" data-idx="${i}">Delete</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function renderAll(){ renderMaterials(); renderGoods(); renderRuns(); }
+
+document.getElementById("app-root");
+document.addEventListener("click", async (e) => {
+  if (e.target.dataset.modal) openModal(e.target.dataset.modal);
+  if (e.target.dataset.del) {
+    const [type, idx] = [e.target.dataset.del, e.target.dataset.idx];
+    data[type].splice(idx, 1);
+    await saveData();
+    renderAll();
+  }
+  if (e.target.dataset.advance !== undefined) {
+    const run = data.runs[e.target.dataset.advance];
+    if (run.status === "planned") run.status = "running";
+    else if (run.status === "running") {
+      run.status = "done";
+      const existingGood = data.goods.find(g => g.name === run.product);
+      if (existingGood) existingGood.qty += Number(run.qty);
+      else data.goods.push({ name: run.product, qty: Number(run.qty), unit: "pcs" });
+    }
+    await saveData();
+    renderAll();
+  }
+});
+
+function openModal(type){
+  const backdrop = document.getElementById("modal-backdrop");
+  const content = document.getElementById("modal-content");
+  let html = "";
+  if (type === "material") {
+    html = `
+      <h3>Add raw material</h3>
+      <label>Name</label><input id="f-name" placeholder="e.g. Cotton fabric">
+      <label>Quantity</label><input id="f-qty" type="number" placeholder="e.g. 500">
+      <label>Unit</label><input id="f-unit" placeholder="e.g. meters, kg">
+      <label>Reorder level</label><input id="f-reorder" type="number" placeholder="e.g. 50">
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modal-cancel">Cancel</button>
+        <button class="btn-save" id="modal-save">Save</button>
+      </div>`;
+  } else if (type === "good") {
+    html = `
+      <h3>Add finished product</h3>
+      <label>Name</label><input id="f-name" placeholder="e.g. Men's shirt">
+      <label>Quantity ready</label><input id="f-qty" type="number" placeholder="e.g. 20">
+      <label>Unit</label><input id="f-unit" placeholder="e.g. pcs">
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modal-cancel">Cancel</button>
+        <button class="btn-save" id="modal-save">Save</button>
+      </div>`;
+  } else if (type === "run") {
+    html = `
+      <h3>New production run</h3>
+      <label>Product</label><input id="f-product" placeholder="e.g. Men's shirt">
+      <label>Target quantity</label><input id="f-qty" type="number" placeholder="e.g. 100">
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modal-cancel">Cancel</button>
+        <button class="btn-save" id="modal-save">Save</button>
+      </div>`;
+  }
+  content.innerHTML = html;
+  backdrop.classList.add("active");
+  document.getElementById("modal-cancel").onclick = () => backdrop.classList.remove("active");
+  document.getElementById("modal-save").onclick = async () => {
+    if (type === "material") {
+      const name = document.getElementById("f-name").value.trim();
+      const qty = Number(document.getElementById("f-qty").value) || 0;
+      const unit = document.getElementById("f-unit").value.trim() || "units";
+      const reorder = Number(document.getElementById("f-reorder").value) || 0;
+      if (!name) return;
+      data.materials.push({ name, qty, unit, reorder });
+    } else if (type === "good") {
+      const name = document.getElementById("f-name").value.trim();
+      const qty = Number(document.getElementById("f-qty").value) || 0;
+      const unit = document.getElementById("f-unit").value.trim() || "units";
+      if (!name) return;
+      data.goods.push({ name, qty, unit });
+    } else if (type === "run") {
+      const product = document.getElementById("f-product").value.trim();
+      const qty = Number(document.getElementById("f-qty").value) || 0;
+      if (!product) return;
+      data.runs.push({ product, qty, status: "planned" });
+    }
+    await saveData();
+    renderAll();
+    backdrop.classList.remove("active");
+  };
+}
+
+(async function init(){
+  await loadData();
+  renderAll();
+})();
+</script>
+</body>
+</html>
