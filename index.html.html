@@ -3,96 +3,260 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shakana — Production Control</title>
+<title>Shakana — Production Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #14181C;
-    --panel: #1C2128;
-    --line: rgba(230,235,240,0.10);
-    --text: #E6EBF0;
-    --muted: rgba(230,235,240,0.55);
-    --steel: #5B8AA6;
-    --amber: #D6923D;
-    --green: #6FA97A;
-    --red: #B9604F;
+    --sidebar-bg: #1A1714;
+    --sidebar-line: rgba(255,255,255,0.08);
+    --sidebar-text: #C9C3BC;
+    --sidebar-muted: #8A8480;
+    --amber: #C17F3A;
+    --amber-dark: #A66A2E;
+    --content-bg: #F1EDE6;
+    --card-bg: #FFFFFF;
+    --card-line: #E4DED4;
+    --ink: #1E1B18;
+    --muted: #8A8072;
+    --red-bg: #FBE3DF;
+    --red-text: #B5453A;
+    --amber-bg: #F7E4CE;
+    --amber-text: #A6672E;
+    --green-bg: #E1EEDD;
+    --green-text: #4C7A44;
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
-  h1,h2,.mono{font-family:'IBM Plex Mono',monospace;}
-  .display{font-family:'Space Grotesk',sans-serif;}
-  .app{max-width:1080px;margin:0 auto;padding:24px 20px 60px;}
-  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
-  .brand{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;}
-  .brand span{color:var(--amber);}
-  .tabs{display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px;}
-  .tabs button{background:transparent;border:none;color:var(--muted);font-size:13px;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Inter';}
-  .tabs button.active{background:var(--steel);color:#0E1114;font-weight:600;}
-  .panel{display:none;}
-  .panel.active{display:block;}
-  .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-  .section-head h2{font-size:15px;letter-spacing:0.4px;color:var(--muted);text-transform:uppercase;margin:0;font-weight:500;}
+  body{margin:0;background:var(--content-bg);color:var(--ink);font-family:'Inter',sans-serif;}
+  .logo, h1, h2{font-family:'Poppins',sans-serif;}
+  .layout{display:flex;min-height:100vh;}
+
+  /* Sidebar */
+  .sidebar{width:250px;flex-shrink:0;background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;padding:24px 16px;}
+  .logo-block{padding:6px 12px 22px;border-bottom:1px solid var(--sidebar-line);margin-bottom:18px;}
+  .logo{color:var(--amber);font-size:22px;font-weight:700;margin:0;}
+  .logo-sub{font-size:10px;letter-spacing:1.5px;color:var(--sidebar-muted);margin-top:2px;}
+  .nav-label{font-size:10px;letter-spacing:1.2px;color:var(--sidebar-muted);padding:14px 12px 6px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--sidebar-text);font-size:14px;font-weight:500;cursor:pointer;margin-bottom:2px;}
+  .nav-item:hover{background:rgba(255,255,255,0.05);}
+  .nav-item.active{background:var(--amber);color:#241708;font-weight:600;}
+  .nav-icon{width:16px;text-align:center;font-size:14px;}
+  .sidebar-footer{margin-top:auto;padding:12px;font-size:13px;color:var(--sidebar-muted);cursor:pointer;}
+
+  /* Main content */
+  .main{flex:1;padding:32px 40px;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;}
+  .page-title{font-size:22px;font-weight:700;margin:0;}
+  .user-chip{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--amber-bg);color:var(--amber-text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;}
+  .stat-card{background:var(--card-bg);border:1px solid var(--card-line);border-radius:10px;padding:18px 20px;}
+  .stat-label{font-size:11px;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+  .stat-value{font-size:26px;font-weight:700;}
+
+  .panel-grid{display:grid;grid-template-columns:1fr;gap:16px;}
+  .panel{background:var(--card-bg);border:1px solid var(--card-line);border-radius:10px;overflow:hidden;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--card-line);}
+  .panel-head h2{font-size:15px;margin:0;font-weight:700;}
   .add-btn{background:var(--amber);color:#241708;border:none;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter';}
-  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:28px;}
-  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line);font-weight:500;}
-  td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px;}
-  tr:last-child td{border-bottom:none;}
-  .qty-low{color:var(--red);font-weight:600;}
-  .qty-ok{color:var(--green);}
-  .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;font-family:'Inter';}
-  .badge.running{background:rgba(111,169,122,0.18);color:var(--green);}
-  .badge.planned{background:rgba(214,146,61,0.18);color:var(--amber);}
-  .badge.done{background:rgba(91,138,166,0.18);color:var(--steel);}
-  .row-actions button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:4px;padding:4px 8px;font-size:11px;cursor:pointer;margin-right:4px;}
-  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;z-index:10;}
+  .btn-outline{background:var(--card-bg);border:1px solid var(--card-line);color:var(--ink);padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter';margin-right:8px;}
+  .head-actions{display:flex;align-items:center;}
+
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);padding:10px 20px;font-weight:600;background:#F8F5F0;}
+  td{padding:13px 20px;border-top:1px solid var(--card-line);font-size:14px;}
+  .empty-row td{color:var(--muted);text-align:center;padding:26px;}
+
+  .pill{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+  .pill.out{background:var(--red-bg);color:var(--red-text);}
+  .pill.critical{background:var(--amber-bg);color:var(--amber-text);}
+  .pill.ok{background:var(--green-bg);color:var(--green-text);}
+  .pill.running{background:var(--amber-bg);color:var(--amber-text);}
+  .pill.planned{background:#EEE9E1;color:var(--muted);}
+  .pill.done{background:var(--green-bg);color:var(--green-text);}
+  .row-actions button{background:none;border:1px solid var(--card-line);color:var(--muted);border-radius:5px;padding:5px 9px;font-size:12px;cursor:pointer;margin-right:6px;}
+  .row-actions button.danger{background:#B5453A;color:#fff;border-color:#B5453A;}
+  .placeholder{padding:60px 20px;text-align:center;color:var(--muted);font-size:14px;}
+
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(20,16,12,0.45);align-items:center;justify-content:center;z-index:10;}
   .modal-backdrop.active{display:flex;}
-  .modal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px;width:340px;}
-  .modal h3{margin:0 0 14px;font-family:'Space Grotesk';}
-  .modal label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;}
-  .modal input, .modal select{width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:6px;color:var(--text);font-family:'Inter';font-size:14px;}
-  .modal-actions{display:flex;gap:8px;margin-top:18px;}
-  .modal-actions button{flex:1;padding:9px;border-radius:6px;border:none;cursor:pointer;font-weight:600;font-size:13px;}
-  .btn-cancel{background:transparent;border:1px solid var(--line) !important;color:var(--muted);}
-  .btn-save{background:var(--amber);color:#241708;}
-  .empty{color:var(--muted);font-size:13px;padding:24px;text-align:center;}
-  .note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;}
+  .modal{background:var(--card-bg);border:1px solid var(--card-line);border-radius:12px;padding:22px;width:340px;}
+  .modal.wide{width:600px;padding:26px 28px;}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .modal-head h3{margin:0;font-family:'Poppins';font-size:20px;}
+  .modal-close{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;}
+  .modal hr{border:none;border-top:1px solid var(--card-line);margin:16px 0;}
+  .modal h3{margin:0 0 14px;font-family:'Poppins';font-size:16px;}
+  .modal label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:12px 0 6px;}
+  .modal input, .modal select{width:100%;padding:10px 12px;background:var(--card-bg);border:1px solid var(--card-line);border-radius:8px;color:var(--ink);font-family:'Inter';font-size:14px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .hint{font-size:12px;color:var(--muted);margin-top:10px;}
+  .recipe-title{font-size:15px;font-weight:700;margin:0;}
+  .recipe-sub{font-size:13px;color:var(--muted);font-weight:400;}
+  .recipe-row{display:grid;grid-template-columns:1fr 160px auto;gap:14px;align-items:end;}
+  .recipe-list{margin-top:10px;font-size:13px;color:var(--ink);}
+  .recipe-list div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--card-line);}
+  .btn-add-line{background:var(--card-bg);border:1px solid var(--card-line);color:var(--ink);padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap;}
+  .modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end;}
+  .modal-actions button{padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;}
+  .btn-cancel{background:transparent;border:1px solid var(--card-line) !important;color:var(--ink);}
+  .btn-save{background:var(--amber);color:#fff;}
+
+  /* Production calendar */
+  .cal-toolbar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--content-bg);}
+  .cal-nav{display:flex;gap:8px;}
+  .cal-nav button{background:var(--card-bg);border:1px solid var(--card-line);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);font-family:'Inter';}
+  .cal-range{font-family:'Poppins';font-size:13px;letter-spacing:0.5px;color:var(--muted);font-weight:600;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--card-line);}
+  .cal-col{border-right:1px solid var(--card-line);min-height:220px;}
+  .cal-col:last-child{border-right:none;}
+  .cal-col.weekend{background:#F7F3EC;}
+  .cal-col-head{padding:12px 14px;border-bottom:1px solid var(--card-line);}
+  .cal-day-name{font-size:10px;letter-spacing:1px;color:var(--muted);font-weight:700;}
+  .cal-day-date{font-size:15px;font-weight:700;margin-top:2px;}
+  .cal-col-body{padding:14px;}
+  .cal-empty{color:var(--muted);font-size:13px;text-align:center;padding:10px 0;}
+  .cal-entry{background:var(--amber-bg);color:var(--amber-text);border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:8px;}
+  .cal-entry strong{display:block;font-size:13px;color:var(--ink);margin-bottom:2px;}
+  .log-btn{display:inline-block;margin-top:6px;margin-right:6px;background:var(--card-bg);border:1px solid var(--amber);color:var(--amber-text);border-radius:6px;padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter';}
+  .log-btn.correct{border-color:#B5453A;color:#B5453A;}
+
+  /* Plan modal: material check + estimate */
+  .mat-check{border-radius:10px;padding:14px 16px;margin:16px 0;font-size:13px;line-height:1.7;}
+  .mat-check.ok{background:var(--green-bg);color:var(--green-text);}
+  .mat-check.warn{background:var(--red-bg);color:var(--red-text);}
+  .mat-check-title{font-weight:700;margin-bottom:4px;}
+  .estimate-block{font-size:13px;color:var(--ink);line-height:1.9;margin-bottom:6px;}
+  .estimate-block .queued{color:var(--amber-text);font-weight:600;}
+  .estimate-block b{font-weight:700;}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="topbar">
-    <div class="brand">Shakana <span>&middot;</span> production control</div>
-    <div class="tabs">
-      <button id="tab-materials" class="active">Raw Materials</button>
-      <button id="tab-goods">Finished Goods</button>
-      <button id="tab-runs">Production Runs</button>
+<div class="layout">
+  <div class="sidebar">
+    <div class="logo-block">
+      <p class="logo">Shakana</p>
+      <div class="logo-sub">PRODUCTION SUITE</div>
     </div>
+    <div class="nav-label">MAIN</div>
+    <div class="nav-item active" data-view="dashboard"><span class="nav-icon">▦</span> Dashboard</div>
+    <div class="nav-item" data-view="products"><span class="nav-icon">▥</span> Products</div>
+    <div class="nav-item" data-view="materials"><span class="nav-icon">▨</span> Raw Materials</div>
+    <div class="nav-item" data-view="production"><span class="nav-icon">⚙</span> Production</div>
+    <div class="nav-item" data-view="sales"><span class="nav-icon">▤</span> Sales</div>
+    <div class="nav-label">REPORTS</div>
+    <div class="nav-item" data-view="analytics"><span class="nav-icon">↗</span> Analytics</div>
+    <div class="nav-item" data-view="approvals"><span class="nav-icon">✓</span> Approvals</div>
+    <div class="sidebar-footer">← Sign out</div>
   </div>
 
-  <div id="panel-materials" class="panel active">
-    <div class="section-head"><h2>Raw material stock</h2><button class="add-btn" data-modal="material">+ Add material</button></div>
-    <table>
-      <thead><tr><th>Material</th><th>Quantity</th><th>Unit</th><th>Reorder level</th><th></th></tr></thead>
-      <tbody id="materials-body"></tbody>
-    </table>
-  </div>
+  <div class="main">
+    <div class="topbar">
+      <h1 class="page-title" id="page-title">Dashboard</h1>
+      <div class="user-chip">Shakana Team <div class="avatar">ST</div></div>
+    </div>
 
-  <div id="panel-goods" class="panel">
-    <div class="section-head"><h2>Finished goods stock</h2><button class="add-btn" data-modal="good">+ Add product</button></div>
-    <table>
-      <thead><tr><th>Product</th><th>Quantity ready</th><th>Unit</th><th></th></tr></thead>
-      <tbody id="goods-body"></tbody>
-    </table>
-  </div>
+    <div id="view-dashboard" class="view active">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Finished Stock</div><div class="stat-value" id="stat-finished">0</div></div>
+        <div class="stat-card"><div class="stat-label">Active Plans</div><div class="stat-value" id="stat-runs">0</div></div>
+        <div class="stat-card"><div class="stat-label">Low Stock Alerts</div><div class="stat-value" id="stat-low">0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Low Stock Items</h2></div>
+        <table>
+          <thead><tr><th>Item</th><th>Stock</th><th>Alert</th></tr></thead>
+          <tbody id="low-stock-body"></tbody>
+        </table>
+      </div>
+    </div>
 
-  <div id="panel-runs" class="panel">
-    <div class="section-head"><h2>Production runs</h2><button class="add-btn" data-modal="run">+ New run</button></div>
-    <table>
-      <thead><tr><th>Product</th><th>Target qty</th><th>Status</th><th></th></tr></thead>
-      <tbody id="runs-body"></tbody>
-    </table>
-    <div class="note">Marking a run "Done" adds its target quantity into Finished Goods stock automatically.</div>
+    <div id="view-products" class="view">
+      <div class="panel">
+        <div class="panel-head"><h2>Products</h2><button class="add-btn" data-modal="good">+ Add product</button></div>
+        <table>
+          <thead><tr><th>SKU</th><th>Product</th><th>Unit price</th><th>Stock</th><th>Reorder point</th><th></th></tr></thead>
+          <tbody id="goods-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-materials" class="view">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Raw Material Inventory</h2>
+          <div class="head-actions">
+            <button class="btn-outline" id="csv-export">↓ CSV</button>
+            <button class="add-btn" data-modal="material">+ Add Material</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Unit</th><th>In Stock</th><th>Reorder At</th><th>Cost/Unit</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="materials-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-production" class="view">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Active Plans</div><div class="stat-value" id="stat-active-plans">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Target</div><div class="stat-value" id="stat-total-target">0</div><div class="hint" id="stat-pace">~0/day combined pace</div></div>
+        <div class="stat-card"><div class="stat-label">Units Produced</div><div class="stat-value" id="stat-produced">0</div><div class="hint" id="stat-today-target">Today's target: 0</div></div>
+        <div class="stat-card"><div class="stat-label">Remaining This Week</div><div class="stat-value" id="stat-remaining">0</div></div>
+        <div class="stat-card"><div class="stat-label">Est. Hours Left</div><div class="stat-value" id="stat-hours">~0.0h</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Weekly Production Plan</h2><button class="add-btn" data-modal="plan">+ New Plan</button></div>
+        <div class="cal-toolbar">
+          <div class="cal-nav">
+            <button id="cal-prev">‹ Prev</button>
+            <button id="cal-today">Today</button>
+            <button id="cal-next">Next ›</button>
+          </div>
+          <div class="cal-range" id="cal-range"></div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </div>
+
+    <div id="view-sales" class="view">
+      <div class="panel">
+        <div class="panel-head"><h2>Sales Log</h2><button class="add-btn" data-modal="sale">+ New Sale</button></div>
+        <table>
+          <thead><tr><th>Date</th><th>Customer</th><th>Products</th><th>Total</th><th></th></tr></thead>
+          <tbody id="sales-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-analytics" class="view">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="an-revenue">0</div></div>
+        <div class="stat-card"><div class="stat-label">Units Sold</div><div class="stat-value" id="an-units-sold">0</div></div>
+        <div class="stat-card"><div class="stat-label">Stock Value</div><div class="stat-value" id="an-stock-value">0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Top Selling Products</h2></div>
+        <table>
+          <thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th></tr></thead>
+          <tbody id="an-top-products"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="view-approvals" class="view">
+      <div class="panel">
+        <div class="panel-head"><h2>Pending Approvals</h2></div>
+        <table>
+          <thead><tr><th>Date</th><th>Customer</th><th>Products</th><th>Total</th><th></th></tr></thead>
+          <tbody id="approvals-body"></tbody>
+        </table>
+        <div class="hint" style="padding:14px 20px;">Sales above 50,000 RWF are held here for approval before stock is deducted.</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -102,160 +266,655 @@
 
 <script>
 const STORE_KEY = "factory_data";
-let data = { materials: [], goods: [], runs: [] };
+let data = { materials: [], goods: [], plans: [], sales: [] };
+let weekOffset = 0;
+const TITLES = { dashboard: "Dashboard", products: "Products", materials: "Raw Materials", production: "Production", sales: "Sales", analytics: "Analytics", approvals: "Approvals" };
 
 async function loadData(){
   try {
-    const existing = await window.storage.get(STORE_KEY, false);
-    if (existing) data = JSON.parse(existing.value);
-  } catch(e) { /* first run, nothing stored yet */ }
+    const existing = localStorage.getItem(STORE_KEY);
+    if (existing) data = JSON.parse(existing);
+  } catch(e) { console.error("load failed", e); }
+  if (!data.sales) data.sales = [];
 }
 async function saveData(){
-  try { await window.storage.set(STORE_KEY, JSON.stringify(data), false); }
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
   catch(e) { console.error("save failed", e); }
 }
 
-function switchTab(name){
-  ["materials","goods","runs"].forEach(t => {
-    document.getElementById(`tab-${t}`).classList.toggle("active", t === name);
-    document.getElementById(`panel-${t}`).classList.toggle("active", t === name);
-  });
+document.querySelectorAll(".nav-item").forEach(item => {
+  item.addEventListener("click", () => switchView(item.dataset.view));
+});
+function switchView(name){
+  document.querySelectorAll(".nav-item").forEach(i => i.classList.toggle("active", i.dataset.view === name));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === `view-${name}`));
+  document.getElementById("page-title").textContent = TITLES[name];
+  if (name === "dashboard") renderDashboard();
+  if (name === "production") renderProduction();
+  if (name === "analytics") renderAnalytics();
+  if (name === "approvals") renderApprovals();
 }
-document.getElementById("tab-materials").onclick = () => switchTab("materials");
-document.getElementById("tab-goods").onclick = () => switchTab("goods");
-document.getElementById("tab-runs").onclick = () => switchTab("runs");
 
 function renderMaterials(){
   const body = document.getElementById("materials-body");
-  if (!data.materials.length) { body.innerHTML = `<tr><td colspan="5" class="empty">No raw materials yet</td></tr>`; return; }
-  body.innerHTML = data.materials.map((m, i) => `
+  if (!data.materials.length) { body.innerHTML = `<tr class="empty-row"><td colspan="7">No raw materials yet</td></tr>`; return; }
+  body.innerHTML = data.materials.map((m, i) => {
+    const isOut = m.qty <= 0;
+    return `
     <tr>
       <td>${m.name}</td>
-      <td class="${m.qty <= m.reorder ? 'qty-low' : 'qty-ok'}">${m.qty}</td>
       <td>${m.unit}</td>
+      <td>${m.qty}</td>
       <td>${m.reorder}</td>
-      <td class="row-actions"><button data-del="materials" data-idx="${i}">Delete</button></td>
-    </tr>
-  `).join("");
+      <td>RWF ${(m.cost || 0).toLocaleString()}</td>
+      <td><span class="pill ${isOut ? 'out' : 'ok'}">${isOut ? 'Out' : 'OK'}</span></td>
+      <td class="row-actions">
+        <button data-stock-adjust="${i}" data-target="materials" data-dir="1">+ Stock</button>
+        <button data-stock-adjust="${i}" data-target="materials" data-dir="-1">− Stock</button>
+        <button data-edit="material" data-idx="${i}">Edit</button>
+        <button class="danger" data-del="materials" data-idx="${i}">Delete</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function exportMaterialsCsv(){
+  const header = "Name,Unit,In Stock,Reorder At,Cost per unit\n";
+  const rows = data.materials.map(m => `${m.name},${m.unit},${m.qty},${m.reorder},${m.cost || 0}`).join("\n");
+  const blob = new Blob([header + rows], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "raw-materials.csv";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function renderGoods(){
   const body = document.getElementById("goods-body");
-  if (!data.goods.length) { body.innerHTML = `<tr><td colspan="4" class="empty">No finished goods yet</td></tr>`; return; }
+  if (!data.goods.length) { body.innerHTML = `<tr class="empty-row"><td colspan="6">No products yet</td></tr>`; return; }
   body.innerHTML = data.goods.map((g, i) => `
     <tr>
+      <td>${g.sku || "—"}</td>
       <td>${g.name}</td>
+      <td>${g.price ? g.price.toLocaleString() + " RWF" : "—"}</td>
       <td>${g.qty}</td>
-      <td>${g.unit}</td>
-      <td class="row-actions"><button data-del="goods" data-idx="${i}">Delete</button></td>
-    </tr>
-  `).join("");
-}
-
-function renderRuns(){
-  const body = document.getElementById("runs-body");
-  if (!data.runs.length) { body.innerHTML = `<tr><td colspan="4" class="empty">No production runs yet</td></tr>`; return; }
-  body.innerHTML = data.runs.map((r, i) => `
-    <tr>
-      <td>${r.product}</td>
-      <td>${r.qty}</td>
-      <td><span class="badge ${r.status}">${r.status}</span></td>
+      <td>${g.reorderPoint ?? "—"}</td>
       <td class="row-actions">
-        ${r.status !== "done" ? `<button data-advance="${i}">${r.status === "planned" ? "Start" : "Mark done"}</button>` : ""}
-        <button data-del="runs" data-idx="${i}">Delete</button>
+        <button data-stock-adjust="${i}" data-target="goods" data-dir="1">+ Restock</button>
+        <button data-stock-adjust="${i}" data-target="goods" data-dir="-1">− Sold</button>
+        <button data-edit="good" data-idx="${i}">Edit</button>
+        <button class="danger" data-del="goods" data-idx="${i}">Delete</button>
       </td>
     </tr>
   `).join("");
 }
 
-function renderAll(){ renderMaterials(); renderGoods(); renderRuns(); }
+const DAY_NAMES = ["MON","TUE","WED","THU","FRI","SAT","SUN"];
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-document.getElementById("app-root");
+function getWeekDates(offset){
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + mondayOffset + offset * 7);
+  monday.setHours(0,0,0,0);
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+function toKey(d){ return d.toISOString().slice(0,10); }
+
+function renderProduction(){
+  const dates = getWeekDates(weekOffset);
+  const rangeText = `${MONTH_NAMES[dates[0].getMonth()]} ${dates[0].getDate()} - ${MONTH_NAMES[dates[6].getMonth()]} ${dates[6].getDate()}, ${dates[6].getFullYear()}`;
+  document.getElementById("cal-range").textContent = rangeText;
+
+  const grid = document.getElementById("cal-grid");
+  grid.innerHTML = dates.map((d, i) => {
+    const key = toKey(d);
+    const isWeekend = i >= 5;
+    const entries = data.plans.filter(p => p.date === key);
+    let bodyHtml;
+    if (isWeekend && entries.length === 0) {
+      bodyHtml = `<div class="cal-empty">Non-working day</div>`;
+    } else if (entries.length === 0) {
+      bodyHtml = `<div class="cal-empty">—</div>`;
+    } else {
+      bodyHtml = entries.map(e => {
+        const remaining = Math.max(0, Number(e.target) - Number(e.produced || 0));
+        return `<div class="cal-entry">
+          <strong>${e.product}</strong>
+          ${e.produced}/${e.target} units done${remaining > 0 ? ` &middot; ${remaining} left` : " &middot; complete"}
+          <button class="log-btn" data-log-plan="${e.id}">+ Log production</button>
+          <button class="log-btn correct" data-correct-plan="${e.id}">− Correct</button>
+        </div>`;
+      }).join("");
+    }
+    return `
+      <div class="cal-col ${isWeekend ? 'weekend' : ''}">
+        <div class="cal-col-head">
+          <div class="cal-day-name">${DAY_NAMES[i]}</div>
+          <div class="cal-day-date">${MONTH_NAMES[d.getMonth()]} ${d.getDate()}</div>
+        </div>
+        <div class="cal-col-body">${bodyHtml}</div>
+      </div>`;
+  }).join("");
+
+  // Stats for the visible week
+  const weekKeys = dates.map(toKey);
+  const weekPlans = data.plans.filter(p => weekKeys.includes(p.date));
+  const totalTarget = weekPlans.reduce((s, p) => s + Number(p.target), 0);
+  const produced = weekPlans.reduce((s, p) => s + Number(p.produced || 0), 0);
+  const totalHours = weekPlans.reduce((s, p) => s + (Number(p.target) - Number(p.produced || 0)) * (Number(p.hoursPerUnit) || 0), 0);
+  const todayKey = toKey(new Date());
+  const todayTarget = data.plans.filter(p => p.date === todayKey).reduce((s, p) => s + Number(p.target), 0);
+  const workingDays = 5;
+
+  document.getElementById("stat-active-plans").textContent = weekPlans.length;
+  document.getElementById("stat-total-target").textContent = totalTarget;
+  document.getElementById("stat-pace").textContent = `~${Math.round(totalTarget / workingDays)}/day combined pace`;
+  document.getElementById("stat-produced").textContent = produced;
+  document.getElementById("stat-today-target").textContent = `Today's target: ${todayTarget}`;
+  document.getElementById("stat-remaining").textContent = Math.max(0, totalTarget - produced);
+  document.getElementById("stat-hours").textContent = `~${totalHours.toFixed(1)}h`;
+}
+
+
+function renderDashboard(){
+  const finished = data.goods.reduce((s, g) => s + Number(g.qty), 0);
+  const activeRuns = data.plans.length;
+  const lowMaterials = data.materials.filter(m => m.qty <= m.reorder);
+  document.getElementById("stat-finished").textContent = finished;
+  document.getElementById("stat-runs").textContent = activeRuns;
+  document.getElementById("stat-low").textContent = lowMaterials.length;
+  const body = document.getElementById("low-stock-body");
+  if (!lowMaterials.length) { body.innerHTML = `<tr class="empty-row"><td colspan="3">No low stock items</td></tr>`; return; }
+  body.innerHTML = lowMaterials.map(m => {
+    const level = m.qty === 0 ? "out" : "critical";
+    const label = m.qty === 0 ? "Out" : "Critical";
+    return `<tr><td>${m.name}</td><td>${m.qty}</td><td><span class="pill ${level}">${label}</span></td></tr>`;
+  }).join("");
+}
+
+function renderAll(){ renderMaterials(); renderGoods(); renderDashboard(); renderSales(); if (document.getElementById("view-production").classList.contains("active")) renderProduction(); }
+
+function renderApprovals(){
+  const body = document.getElementById("approvals-body");
+  const pending = data.sales.filter(s => s.status === "pending");
+  if (!pending.length) { body.innerHTML = `<tr class="empty-row"><td colspan="5">No sales pending approval</td></tr>`; return; }
+  body.innerHTML = pending.map(s => {
+    const idx = data.sales.indexOf(s);
+    const itemsText = s.items.map(it => `${it.product} ×${it.qty}`).join(", ");
+    return `
+    <tr>
+      <td>${s.date}</td>
+      <td>${s.customer}</td>
+      <td>${itemsText}</td>
+      <td>${s.total.toLocaleString()} RWF</td>
+      <td class="row-actions">
+        <button data-approve="${idx}">Approve</button>
+        <button class="danger" data-reject="${idx}">Reject</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function renderAnalytics(){
+  const completed = data.sales.filter(s => s.status !== "pending");
+  const revenue = completed.reduce((s, sale) => s + sale.total, 0);
+  const unitsSold = completed.reduce((s, sale) => s + sale.items.reduce((s2, it) => s2 + it.qty, 0), 0);
+  const stockValue = data.goods.reduce((s, g) => s + (g.price || 0) * g.qty, 0);
+
+  document.getElementById("an-revenue").textContent = revenue.toLocaleString() + " RWF";
+  document.getElementById("an-units-sold").textContent = unitsSold;
+  document.getElementById("an-stock-value").textContent = stockValue.toLocaleString() + " RWF";
+
+  const totals = {};
+  completed.forEach(sale => {
+    sale.items.forEach(it => {
+      if (!totals[it.product]) totals[it.product] = { qty: 0, revenue: 0 };
+      const good = data.goods.find(g => g.name === it.product);
+      totals[it.product].qty += it.qty;
+      totals[it.product].revenue += (good ? good.price || 0 : 0) * it.qty;
+    });
+  });
+  const sorted = Object.entries(totals).sort((a, b) => b[1].qty - a[1].qty).slice(0, 5);
+  const body = document.getElementById("an-top-products");
+  if (!sorted.length) { body.innerHTML = `<tr class="empty-row"><td colspan="3">No completed sales yet</td></tr>`; return; }
+  body.innerHTML = sorted.map(([name, t]) => `
+    <tr><td>${name}</td><td>${t.qty}</td><td>${t.revenue.toLocaleString()} RWF</td></tr>
+  `).join("");
+}
+
+function renderSales(){
+  const body = document.getElementById("sales-body");
+  if (!body) return;
+  if (!data.sales.length) { body.innerHTML = `<tr class="empty-row"><td colspan="5">No sales logged yet</td></tr>`; return; }
+  body.innerHTML = data.sales.slice().reverse().map((s) => {
+    const idx = data.sales.indexOf(s);
+    const itemsText = s.items.map(it => `${it.product} ×${it.qty}`).join(", ");
+    const statusPill = s.status === "pending" ? `<span class="pill critical">Pending approval</span>` : `<span class="pill ok">Completed</span>`;
+    return `
+    <tr>
+      <td>${s.date}</td>
+      <td>${s.customer}</td>
+      <td>${itemsText} ${statusPill}</td>
+      <td>${s.total.toLocaleString()} RWF</td>
+      <td class="row-actions"><button class="danger" data-del="sales" data-idx="${idx}">Delete</button></td>
+    </tr>`;
+  }).join("");
+}
+
 document.addEventListener("click", async (e) => {
   if (e.target.dataset.modal) openModal(e.target.dataset.modal);
+  if (e.target.dataset.edit) openModal(e.target.dataset.edit, Number(e.target.dataset.idx));
+  if (e.target.id === "csv-export") exportMaterialsCsv();
   if (e.target.dataset.del) {
     const [type, idx] = [e.target.dataset.del, e.target.dataset.idx];
+    if (type === "sales") {
+      const sale = data.sales[idx];
+      if (sale && sale.status !== "pending") {
+        sale.items.forEach(it => {
+          const good = data.goods.find(g => g.name === it.product);
+          if (good) good.qty = Number(good.qty || 0) + Number(it.qty);
+        });
+      }
+    }
     data[type].splice(idx, 1);
     await saveData();
     renderAll();
   }
-  if (e.target.dataset.advance !== undefined) {
-    const run = data.runs[e.target.dataset.advance];
-    if (run.status === "planned") run.status = "running";
-    else if (run.status === "running") {
-      run.status = "done";
-      const existingGood = data.goods.find(g => g.name === run.product);
-      if (existingGood) existingGood.qty += Number(run.qty);
-      else data.goods.push({ name: run.product, qty: Number(run.qty), unit: "pcs" });
-    }
+  if (e.target.dataset.stockAdjust !== undefined) {
+    const idx = Number(e.target.dataset.stockAdjust);
+    const target = e.target.dataset.target || "materials";
+    const dir = Number(e.target.dataset.dir);
+    const item = data[target][idx];
+    const verb = target === "goods" ? (dir > 0 ? "Restock" : "Mark sold") : (dir > 0 ? "Add" : "Remove");
+    const amountStr = window.prompt(`${verb} how much of "${item.name}"?`, "0");
+    const amount = Number(amountStr);
+    if (!amountStr || isNaN(amount) || amount <= 0) return;
+    item.qty = Math.max(0, item.qty + dir * amount);
     await saveData();
     renderAll();
   }
+  if (e.target.dataset.logPlan) {
+    const plan = data.plans.find(p => p.id === e.target.dataset.logPlan);
+    if (!plan) return;
+    const remaining = Math.max(0, Number(plan.target) - Number(plan.produced || 0));
+    const amountStr = window.prompt(`How many "${plan.product}" units were produced today? (${remaining} left on this plan)`, "0");
+    const amount = Number(amountStr);
+    if (!amountStr || isNaN(amount) || amount <= 0) return;
+    plan.produced = Number(plan.produced || 0) + amount;
+    const good = data.goods.find(g => g.name === plan.product);
+    if (good) good.qty = Number(good.qty || 0) + amount;
+    await saveData();
+    renderAll();
+  }
+  if (e.target.dataset.correctPlan) {
+    const plan = data.plans.find(p => p.id === e.target.dataset.correctPlan);
+    if (!plan) return;
+    const amountStr = window.prompt(`Correcting a mistake: how many "${plan.product}" units should be removed from today's logged production? (currently ${plan.produced || 0} logged)`, "0");
+    const amount = Number(amountStr);
+    if (!amountStr || isNaN(amount) || amount <= 0) return;
+    plan.produced = Math.max(0, Number(plan.produced || 0) - amount);
+    const good = data.goods.find(g => g.name === plan.product);
+    if (good) good.qty = Math.max(0, Number(good.qty || 0) - amount);
+    await saveData();
+    renderAll();
+  }
+  if (e.target.dataset.approve !== undefined) {
+    const sale = data.sales[Number(e.target.dataset.approve)];
+    if (!sale) return;
+    sale.items.forEach(it => {
+      const good = data.goods.find(g => g.name === it.product);
+      if (good) good.qty = Math.max(0, good.qty - it.qty);
+    });
+    sale.status = "completed";
+    await saveData();
+    renderAll();
+    renderApprovals();
+  }
+  if (e.target.dataset.reject !== undefined) {
+    const idx = Number(e.target.dataset.reject);
+    data.sales.splice(idx, 1);
+    await saveData();
+    renderAll();
+    renderApprovals();
+  }
 });
 
-function openModal(type){
+let pendingRecipe = [];
+let pendingSaleItems = [];
+
+function renderSaleList(){
+  const list = document.getElementById("sale-list");
+  if (!list) return;
+  if (!pendingSaleItems.length) { list.innerHTML = ""; document.getElementById("sale-total").textContent = "Total: 0 RWF"; return; }
+  list.innerHTML = pendingSaleItems.map((it, i) =>
+    `<div><span>${it.product} × ${it.qty}</span><span data-remove-sale="${i}" style="cursor:pointer;color:var(--muted);">✕</span></div>`
+  ).join("");
+  const total = pendingSaleItems.reduce((sum, it) => {
+    const g = data.goods.find(g => g.name === it.product);
+    return sum + (g ? g.price || 0 : 0) * it.qty;
+  }, 0);
+  document.getElementById("sale-total").textContent = `Total: ${total.toLocaleString()} RWF`;
+}
+
+function nextSku(){
+  const n = data.goods.length + 1;
+  return "SHA-" + String(n).padStart(3, "0");
+}
+
+function renderRecipeList(){
+  const list = document.getElementById("recipe-list");
+  if (!list) return;
+  if (!pendingRecipe.length) { list.innerHTML = ""; return; }
+  list.innerHTML = pendingRecipe.map((r, i) =>
+    `<div><span>${r.material} — ${r.qty} per unit</span><span data-remove-recipe="${i}" style="cursor:pointer;color:var(--muted);">✕</span></div>`
+  ).join("");
+}
+
+function updatePlanEstimate(){
+  const productName = document.getElementById("f-product").value;
+  const qty = Number(document.getElementById("f-qty").value) || 0;
+  const matContainer = document.getElementById("mat-check-container");
+  const estContainer = document.getElementById("estimate-container");
+  if (!productName || !qty) { matContainer.innerHTML = ""; estContainer.innerHTML = ""; return; }
+
+  const product = data.goods.find(g => g.name === productName);
+  const recipe = (product && product.recipe) || [];
+
+  // Material availability
+  let allOk = true;
+  const lines = recipe.map(r => {
+    const material = data.materials.find(m => m.name === r.material);
+    const need = Number(r.qty) * qty;
+    const have = material ? material.qty : 0;
+    const ok = have >= need;
+    if (!ok) allOk = false;
+    const unit = material ? material.unit : "";
+    return `${r.material}: need ${need.toFixed(2)} ${unit}, have ${have} ${ok ? "✓" : "✗"}`;
+  });
+  if (recipe.length === 0) {
+    matContainer.innerHTML = "";
+  } else {
+    matContainer.innerHTML = `
+      <div class="mat-check ${allOk ? 'ok' : 'warn'}">
+        <div class="mat-check-title">${allOk ? "✓ Enough material available" : "✗ Not enough material"}</div>
+        ${lines.join("<br>")}
+      </div>`;
+  }
+
+  // Scheduling estimate
+  const prodTimeMin = (product && product.prodTime) || 0;
+  const totalHours = (prodTimeMin * qty) / 60;
+  const workHoursPerDay = 8;
+  const daysNeeded = Math.max(1, Math.ceil(totalHours / workHoursPerDay || 1));
+  const dailyTarget = Math.ceil(qty / daysNeeded);
+
+  // Queue: sum remaining hours of other incomplete plans
+  const queuedHours = data.plans.reduce((sum, p) => {
+    const remaining = Number(p.target) - Number(p.produced || 0);
+    if (remaining <= 0) return sum;
+    const pProduct = data.goods.find(g => g.name === p.product);
+    const pTime = (pProduct && pProduct.prodTime) || 0;
+    return sum + (remaining * pTime) / 60;
+  }, 0);
+
+  const now = new Date();
+  const start = new Date(now.getTime() + queuedHours * 60 * 60 * 1000);
+  const finish = new Date(start.getTime() + totalHours * 60 * 60 * 1000);
+  const fmt = (d) => d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + ", " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+
+  estContainer.innerHTML = `
+    <div class="estimate-block">
+      Estimated time: <b>~${totalHours.toFixed(1)} hours</b> at 8h/day (8am–5pm, 1h break) → <b>${daysNeeded} day${daysNeeded > 1 ? "s" : ""}</b><br>
+      Queue: work starts <b>${fmt(start)}</b> ${queuedHours > 0 ? '<span class="queued">(queued behind existing plans)</span>' : ''}<br>
+      Est. finish: <b>${fmt(finish)}</b><br>
+      Daily target: <b>~${dailyTarget}/day</b>
+    </div>`;
+}
+
+function openModal(type, editIdx){
   const backdrop = document.getElementById("modal-backdrop");
   const content = document.getElementById("modal-content");
   let html = "";
+  const editing = editIdx !== undefined;
   if (type === "material") {
+    content.className = "modal wide";
+    const m = editing ? data.materials[editIdx] : { name: "", unit: "kg", cost: 0, qty: 0, reorder: 0 };
     html = `
-      <h3>Add raw material</h3>
-      <label>Name</label><input id="f-name" placeholder="e.g. Cotton fabric">
-      <label>Quantity</label><input id="f-qty" type="number" placeholder="e.g. 500">
-      <label>Unit</label><input id="f-unit" placeholder="e.g. meters, kg">
-      <label>Reorder level</label><input id="f-reorder" type="number" placeholder="e.g. 50">
+      <div class="modal-head"><h3>${editing ? "Edit" : "Add"} Raw Material</h3><button class="modal-close" id="modal-cancel">✕</button></div>
+      <hr>
+      <label>Material name</label>
+      <input id="f-name" placeholder="e.g. Cotton Fabric — White" value="${m.name}">
+      <div class="form-row">
+        <div><label>Unit</label>
+          <select id="f-unit">
+            ${["kg","pcs","spools","meters","liters","g"].map(u => `<option value="${u}" ${m.unit===u?"selected":""}>${u}</option>`).join("")}
+          </select>
+        </div>
+        <div><label>Cost per unit (RWF)</label><input id="f-cost" type="number" placeholder="0" value="${m.cost || ''}"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Opening stock</label><input id="f-qty" type="number" placeholder="0" value="${m.qty || ''}"></div>
+        <div><label>Reorder point</label><input id="f-reorder" type="number" placeholder="0" value="${m.reorder || ''}"></div>
+      </div>
+      <hr>
       <div class="modal-actions">
-        <button class="btn-cancel" id="modal-cancel">Cancel</button>
-        <button class="btn-save" id="modal-save">Save</button>
+        <button class="btn-cancel" id="modal-cancel-2">Cancel</button>
+        <button class="btn-save" id="modal-save">Save Material</button>
       </div>`;
   } else if (type === "good") {
+    content.className = "modal wide";
+    const g = editing ? data.goods[editIdx] : { name: "", price: "", reorderPoint: "", prodTime: "", notes: "", sku: nextSku(), recipe: [] };
+    pendingRecipe = editing ? g.recipe.slice() : [];
+    const materialOptions = data.materials.map(m => `<option value="${m.name}">${m.name}</option>`).join("");
     html = `
-      <h3>Add finished product</h3>
-      <label>Name</label><input id="f-name" placeholder="e.g. Men's shirt">
-      <label>Quantity ready</label><input id="f-qty" type="number" placeholder="e.g. 20">
-      <label>Unit</label><input id="f-unit" placeholder="e.g. pcs">
+      <div class="modal-head"><h3>${editing ? "Edit" : "New"} Product</h3><button class="modal-close" id="modal-cancel">✕</button></div>
+      <hr>
+      <label>Product name (full description)</label>
+      <input id="f-name" placeholder="e.g. White T-Shirt Men's Medium" value="${g.name}">
+      <div class="form-row">
+        <div><label>Unit price (RWF)</label><input id="f-price" type="number" placeholder="0" value="${g.price || ''}"></div>
+        <div><label>Reorder point (units)</label><input id="f-reorder" type="number" placeholder="20" value="${g.reorderPoint || ''}"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Production time per unit (minutes)</label><input id="f-prodtime" type="number" placeholder="e.g. 12" value="${g.prodTime || ''}"></div>
+        <div><label>Notes (optional)</label><input id="f-notes" placeholder="Any additional info" value="${g.notes || ''}"></div>
+      </div>
+      <div class="hint">SKU (${editing ? g.sku : nextSku()}) is auto-generated — you never enter it manually</div>
+      <hr>
+      <p class="recipe-title">Recipe / Bill of Materials <span class="recipe-sub">— raw materials needed per 1 unit produced</span></p>
+      <div class="recipe-row">
+        <div><label>Raw material</label>
+          <select id="f-recipe-material"><option value="">— select —</option>${materialOptions}</select>
+        </div>
+        <div><label>Qty per unit</label><input id="f-recipe-qty" type="number" step="0.1" placeholder="e.g. 1.5"></div>
+        <button class="btn-add-line" id="recipe-add-line">+ Add</button>
+      </div>
+      <div class="recipe-list" id="recipe-list"></div>
       <div class="modal-actions">
-        <button class="btn-cancel" id="modal-cancel">Cancel</button>
-        <button class="btn-save" id="modal-save">Save</button>
+        <button class="btn-cancel" id="modal-cancel-2">Cancel</button>
+        <button class="btn-save" id="modal-save">Save Product</button>
       </div>`;
-  } else if (type === "run") {
+  } else if (type === "plan") {
+    content.className = "modal wide";
+    const productOptions = data.goods.map(g => `<option value="${g.name}">${g.name}</option>`).join("");
+    const today = new Date().toISOString().slice(0,10);
     html = `
-      <h3>New production run</h3>
-      <label>Product</label><input id="f-product" placeholder="e.g. Men's shirt">
-      <label>Target quantity</label><input id="f-qty" type="number" placeholder="e.g. 100">
+      <div class="modal-head"><h3>New Production Plan</h3><button class="modal-close" id="modal-cancel">✕</button></div>
+      <hr>
+      <label>Product</label>
+      <select id="f-product"><option value="">Select product...</option>${productOptions}</select>
+      <div class="form-row">
+        <div><label>Target quantity</label><input id="f-qty" type="number" placeholder="e.g. 100"></div>
+        <div><label>Planned start day</label><input id="f-date" type="date" value="${today}"></div>
+      </div>
+      <div id="mat-check-container"></div>
+      <div id="estimate-container"></div>
+      <label>Notes</label>
+      <input id="f-notes" placeholder="optional">
+      <hr>
       <div class="modal-actions">
-        <button class="btn-cancel" id="modal-cancel">Cancel</button>
-        <button class="btn-save" id="modal-save">Save</button>
+        <button class="btn-cancel" id="modal-cancel-2">Cancel</button>
+        <button class="btn-save" id="modal-save">Create Plan</button>
+      </div>`;
+  } else if (type === "sale") {
+    content.className = "modal wide";
+    pendingSaleItems = [];
+    const productOptions = data.goods.map(g => `<option value="${g.name}">${g.name} (${g.qty} in stock)</option>`).join("");
+    html = `
+      <div class="modal-head"><h3>New Sale</h3><button class="modal-close" id="modal-cancel">✕</button></div>
+      <hr>
+      <label>Customer name</label>
+      <input id="f-customer" placeholder="e.g. Kigali Boutique">
+      <hr>
+      <p class="recipe-title">Products sold</p>
+      <div class="recipe-row">
+        <div><label>Product</label>
+          <select id="f-sale-product"><option value="">— select —</option>${productOptions}</select>
+        </div>
+        <div><label>Quantity</label><input id="f-sale-qty" type="number" placeholder="e.g. 5"></div>
+        <button class="btn-add-line" id="sale-add-line">+ Add</button>
+      </div>
+      <div class="recipe-list" id="sale-list"></div>
+      <div class="hint" id="sale-total">Total: 0 RWF</div>
+      <hr>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modal-cancel-2">Cancel</button>
+        <button class="btn-save" id="modal-save">Record Sale</button>
       </div>`;
   }
   content.innerHTML = html;
   backdrop.classList.add("active");
-  document.getElementById("modal-cancel").onclick = () => backdrop.classList.remove("active");
+  const closeModal = () => backdrop.classList.remove("active");
+  document.getElementById("modal-cancel").onclick = closeModal;
+  const cancel2 = document.getElementById("modal-cancel-2");
+  if (cancel2) cancel2.onclick = closeModal;
+
+  if (type === "good") {
+    renderRecipeList();
+    document.getElementById("recipe-add-line").onclick = () => {
+      const material = document.getElementById("f-recipe-material").value;
+      const qty = document.getElementById("f-recipe-qty").value;
+      if (!material || !qty) return;
+      pendingRecipe.push({ material, qty });
+      document.getElementById("f-recipe-qty").value = "";
+      renderRecipeList();
+    };
+    document.getElementById("recipe-list").addEventListener("click", (e) => {
+      if (e.target.dataset.removeRecipe !== undefined) {
+        pendingRecipe.splice(Number(e.target.dataset.removeRecipe), 1);
+        renderRecipeList();
+      }
+    });
+  }
+
+  if (type === "plan") {
+    const recompute = () => updatePlanEstimate();
+    document.getElementById("f-product").addEventListener("change", recompute);
+    document.getElementById("f-qty").addEventListener("input", recompute);
+    recompute();
+  }
+
+  if (type === "sale") {
+    renderSaleList();
+    document.getElementById("sale-add-line").onclick = () => {
+      const product = document.getElementById("f-sale-product").value;
+      const qty = Number(document.getElementById("f-sale-qty").value);
+      if (!product || !qty || qty <= 0) return;
+      const good = data.goods.find(g => g.name === product);
+      const alreadyQueued = pendingSaleItems.filter(it => it.product === product).reduce((s, it) => s + it.qty, 0);
+      if (good && (alreadyQueued + qty) > good.qty) {
+        alert(`Only ${good.qty} in stock for ${product} (already added ${alreadyQueued}).`);
+        return;
+      }
+      pendingSaleItems.push({ product, qty });
+      document.getElementById("f-sale-qty").value = "";
+      renderSaleList();
+    };
+    document.getElementById("sale-list").addEventListener("click", (e) => {
+      if (e.target.dataset.removeSale !== undefined) {
+        pendingSaleItems.splice(Number(e.target.dataset.removeSale), 1);
+        renderSaleList();
+      }
+    });
+  }
+
   document.getElementById("modal-save").onclick = async () => {
     if (type === "material") {
       const name = document.getElementById("f-name").value.trim();
       const qty = Number(document.getElementById("f-qty").value) || 0;
       const unit = document.getElementById("f-unit").value.trim() || "units";
       const reorder = Number(document.getElementById("f-reorder").value) || 0;
+      const cost = Number(document.getElementById("f-cost").value) || 0;
       if (!name) return;
-      data.materials.push({ name, qty, unit, reorder });
+      if (editing) Object.assign(data.materials[editIdx], { name, qty, unit, reorder, cost });
+      else data.materials.push({ name, qty, unit, reorder, cost });
     } else if (type === "good") {
       const name = document.getElementById("f-name").value.trim();
-      const qty = Number(document.getElementById("f-qty").value) || 0;
-      const unit = document.getElementById("f-unit").value.trim() || "units";
       if (!name) return;
-      data.goods.push({ name, qty, unit });
-    } else if (type === "run") {
-      const product = document.getElementById("f-product").value.trim();
+      const price = Number(document.getElementById("f-price").value) || 0;
+      const reorderPoint = Number(document.getElementById("f-reorder").value) || 0;
+      const prodTime = Number(document.getElementById("f-prodtime").value) || 0;
+      const notes = document.getElementById("f-notes").value.trim();
+      if (editing) {
+        Object.assign(data.goods[editIdx], { name, price, reorderPoint, prodTime, notes, recipe: pendingRecipe.slice() });
+      } else {
+        data.goods.push({
+          name, qty: 0, unit: "pcs", sku: nextSku(),
+          price, reorderPoint, prodTime, notes,
+          recipe: pendingRecipe.slice()
+        });
+      }
+    } else if (type === "plan") {
+      const product = document.getElementById("f-product").value;
+      const date = document.getElementById("f-date").value;
       const qty = Number(document.getElementById("f-qty").value) || 0;
-      if (!product) return;
-      data.runs.push({ product, qty, status: "planned" });
+      const notes = document.getElementById("f-notes").value.trim();
+      if (!product || !date) return;
+      data.plans.push({ id: "p" + Date.now(), product, date, target: qty, produced: 0, hoursPerUnit: 0, notes });
+    } else if (type === "sale") {
+      const customer = document.getElementById("f-customer").value.trim();
+      if (!customer || pendingSaleItems.length === 0) return;
+      let total = 0;
+      pendingSaleItems.forEach(it => {
+        const good = data.goods.find(g => g.name === it.product);
+        if (good) total += (good.price || 0) * it.qty;
+      });
+      const APPROVAL_THRESHOLD = 50000;
+      const needsApproval = total >= APPROVAL_THRESHOLD;
+      if (!needsApproval) {
+        pendingSaleItems.forEach(it => {
+          const good = data.goods.find(g => g.name === it.product);
+          if (good) good.qty = Math.max(0, good.qty - it.qty);
+        });
+      }
+      data.sales.push({
+        id: "s" + Date.now(),
+        customer,
+        items: pendingSaleItems.slice(),
+        total,
+        date: new Date().toISOString().slice(0,10),
+        status: needsApproval ? "pending" : "completed"
+      });
     }
     await saveData();
     renderAll();
-    backdrop.classList.remove("active");
+    closeModal();
   };
 }
+
+document.getElementById("cal-prev").onclick = () => { weekOffset -= 1; renderProduction(); };
+document.getElementById("cal-next").onclick = () => { weekOffset += 1; renderProduction(); };
+document.getElementById("cal-today").onclick = () => { weekOffset = 0; renderProduction(); };
 
 (async function init(){
   await loadData();
